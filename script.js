@@ -1,36 +1,59 @@
-let gameBoard = (() => {
+const gameBoard = (() => {
     let board = ["", "", "", "", "", "", "", "", ""];
 
     //DOM cache
-    const grid = document.querySelectorAll(".board-cell");  
+    const grid = Array.from(document.querySelectorAll(".board-cell"));
 
-    function addMove(move) {
-        board.push(move);
+    //bind events
+    for (let cell in grid) {
+        console.log(cell);
+        grid[cell].addEventListener("click", () => {
+            addMove(cell);
+            displayBoard();
+        });
+    }
+
+    function addMove(cellNumber) {
+        const currentMove = playGame.getTurn();
+        board[cellNumber] = currentMove;
     }
 
     function displayBoard() {
         for (let cell in grid) {
-            //create new elements with classes to allow styling
+            //add classes classes to allow styling
             if (board[cell] == "x") {
-                const cellContent = document.createElement("div");
-                cellContent.setAttribute("class", "x");
-                cellContent.textContent = "X";
-                grid[cell].appendChild(cellContent);
+                grid[cell].classList.add("x");
+                grid[cell].textContent = "X";
             } else if (board[cell] == "o"){
-                const cellContent = document.createElement("div");
-                cellContent.setAttribute("class", "o");
-                cellContent.textContent = "O";
-                grid[cell].appendChild(cellContent);
+                grid[cell].classList.add("o");
+                grid[cell].textContent = "O";
             }   
         }
     }
 
-    return {displayBoard}
+    return {addMove, displayBoard}
 })();
 
-const playerFactory = (name) => {
-
+const createPlayer = (name, symbol) => {
+    let playerName = name;
+    let playerSymbol = symbol;
+    return {playerName, playerSymbol}
 };
 
+const playGame = (() => {
+    const player1 = createPlayer("john", "x");
+    const player2 = createPlayer("jill", "o");
+    let turn = player1;
+
+
+    function getTurn() {
+        return turn.playerSymbol;
+    }
+    
+
+    return {getTurn}
+})();
+
 gameBoard.displayBoard();
+
 
