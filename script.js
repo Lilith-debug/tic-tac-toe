@@ -5,6 +5,8 @@ const game = (() => {
     const message = document.querySelector(".message");
     const restart = document.querySelector(".restart");
     const singlePlayer = document.querySelector(".single-player");
+    const player1Input = document.querySelector(".player1 input");
+    const player2Input = document.querySelector(".player2 input");
 
     //bind events
     for (let cell in grid) {
@@ -19,6 +21,18 @@ const game = (() => {
 
     singlePlayer.addEventListener("click", () => {
         runGame.playSinglePlayer();
+    });
+
+    player1Input.addEventListener("keydown", (event) => {
+        if (event.code == "Enter") {
+            runGame.changePlayerName("player1", player1Input.value);
+        }
+    });
+
+    player2Input.addEventListener("keydown", (event) => {
+        if (event.code == "Enter") {
+            runGame.changePlayerName("player2", player2Input.value);
+        }
     });
     
 
@@ -52,6 +66,18 @@ const game = (() => {
         let singlePlayer = false;
         
         const board = ["", "", "", "", "", "", "", "", ""];
+
+        function changePlayerName(player, name) {
+            player == "player1" ? player1.playerName = name : player2.playerName = name;
+        }
+
+        function getBoardCopy() {
+            let boardCopy = [];
+            for (let cell in board) {
+                boardCopy.push(board[cell]);
+            }
+            return boardCopy;
+        }
 
         function getTurn() {
             return turn === player1 ? "player1" : "player 2"
@@ -138,7 +164,7 @@ const game = (() => {
                 grid[cell].textContent = "";
             }
             gameBoard.displayBoard(board);
-            if (turn === player2) {
+            if (turn === player2 && singlePlayer === true) {
                 computerPlayer.computerPlay();
             }
         }
@@ -147,9 +173,14 @@ const game = (() => {
             singlePlayer = true;
             player2.playerName = "Computer";
             restartGame();
+            const computerName = document.createElement("div");
+            computerName.textContent = "Computer"
+            player2Input.parentElement.appendChild(computerName);
+            player2Input.remove();
         }
 
-        return {getTurn, checkValidMove, playerPlay, restartGame, playSinglePlayer}
+        return {changePlayerName, getBoardCopy, getTurn, checkValidMove,
+                playerPlay, restartGame, playSinglePlayer}
     })();
 
     const computerPlayer = (() => {
