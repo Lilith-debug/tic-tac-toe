@@ -4,9 +4,22 @@
 
 
 .container {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template: 5fr 1fr / 1fr 1fr 1fr;
     align-items: center;
+    justify-items: center;
+    margin-top: 32px;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.main p {
+    height: 16px;
 }
 
 .game-board {
@@ -41,4 +54,10 @@
 
 .board-cell:empty {
     cursor: pointer;
+}
+
+.footer {
+    align-self: end;
+    justify-self: start;
+    padding-left: 24px;
 }

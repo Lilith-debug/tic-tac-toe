@@ -2,6 +2,8 @@ const game = (() => {
 
     //DOM cache
     const grid = Array.from(document.querySelectorAll(".board-cell"));
+    const message = document.querySelector(".message");
+    const restart = document.querySelector(".restart");
 
     //bind events
     for (let cell in grid) {
@@ -10,53 +12,19 @@ const game = (() => {
             runGame.playerPlay(cell);
         });
     }
+    restart.addEventListener("click", () => {
+        runGame.restartGame();
+    })
     
+
+    const createPlayer = (name, symbol) => {
+        let playerName = name;
+        let playerSymbol = symbol;
+        return {playerName, playerSymbol}
+    };
+
     const gameBoard = (() => {
-        let board = ["", "", "", "", "", "", "", "", ""];
-
-        function addMove(cell) {
-            if (board[cell] === "") {
-                const currentMove = runGame.getTurn();
-                board[cell] = currentMove;
-            }
-        }
-
-        function finishGame() {
-            //fill remaining cells to avoid more moves
-            for (let cell in board) {
-                if (board[cell] === "") {
-                    board[cell] = " ";
-                }
-            }
-        }
-
-        function isGameFinished(player1, player2) {
-            if (board[0] == "x" && board[1] == "x" && board[2] == "x" ||
-                board[3] == "x" && board[4] == "x" && board[5] == "x" ||
-                board[6] == "x" && board[7] == "x" && board[8] == "x" ||
-                board[0] == "x" && board[3] == "x" && board[6] == "x" ||
-                board[1] == "x" && board[4] == "x" && board[7] == "x" ||
-                board[2] == "x" && board[5] == "x" && board[8] == "x" ||
-                board[0] == "x" && board[4] == "x" && board[8] == "x" ||
-                board[2] == "x" && board[4] == "x" && board[6] == "x") {
-                console.log(`${player1} wins!`);
-                finishGame();
-            } else if (board[0] == "o" && board[1] == "o" && board[2] == "o" ||
-                board[3] == "o" && board[4] == "o" && board[5] == "o" ||
-                board[6] == "o" && board[7] == "o" && board[8] == "o" ||
-                board[0] == "o" && board[3] == "o" && board[6] == "o" ||
-                board[1] == "o" && board[4] == "o" && board[7] == "o" ||
-                board[2] == "o" && board[5] == "o" && board[8] == "o" ||
-                board[0] == "o" && board[4] == "o" && board[8] == "o" ||
-                board[2] == "o" && board[4] == "o" && board[6] == "o") {
-                console.log(`${player2} wins!`);
-                finishGame();
-            } else if (!board.includes("")) {
-                console.log("It's a tie!");
-            }
-        }
-
-        function displayBoard() {
+        function displayBoard(board) {
             for (let cell in grid) {
                 //add classes classes to allow styling
                 if (board[cell] == "x") {
@@ -67,40 +35,101 @@ const game = (() => {
                     grid[cell].textContent = "O";
                 }   
             }
-        }
-
-        return {addMove, isGameFinished, displayBoard}
+        } 
+        return {displayBoard}
     })();
-
-    const createPlayer = (name, symbol) => {
-        let playerName = name;
-        let playerSymbol = symbol;
-        return {playerName, playerSymbol}
-    };
 
     const runGame = (() => {
         const player1 = createPlayer("john", "x");
         const player2 = createPlayer("jill", "o");
+        let startingPlayer = player1;
         let turn = player1;
+        
+        const board = ["", "", "", "", "", "", "", "", ""];
 
         function getTurn() {
-            return turn.playerSymbol;
+            return turn === player1 ? "player1" : "player 2"
         }
 
-        function changeTurn() {
-            turn == player1 ? turn = player2 : turn = player1;
+        function _changeTurn(currentTurn) {
+            currentTurn == player1 ? turn = player2 : turn = player1;
+            
+        }
+
+        function _addMove(cell) {
+            if (board[cell] === "") {
+                const currentMove = turn.playerSymbol;
+                board[cell] = currentMove;
+            }
+        }
+    
+        function _isGameFinished(player1, player2) {
+            if (board[0] == "x" && board[1] == "x" && board[2] == "x" ||
+                board[3] == "x" && board[4] == "x" && board[5] == "x" ||
+                board[6] == "x" && board[7] == "x" && board[8] == "x" ||
+                board[0] == "x" && board[3] == "x" && board[6] == "x" ||
+                board[1] == "x" && board[4] == "x" && board[7] == "x" ||
+                board[2] == "x" && board[5] == "x" && board[8] == "x" ||
+                board[0] == "x" && board[4] == "x" && board[8] == "x" ||
+                board[2] == "x" && board[4] == "x" && board[6] == "x") {
+                message.textContent = `${player1} wins!`;
+                _finishGame();
+            } else if (board[0] == "o" && board[1] == "o" && board[2] == "o" ||
+                board[3] == "o" && board[4] == "o" && board[5] == "o" ||
+                board[6] == "o" && board[7] == "o" && board[8] == "o" ||
+                board[0] == "o" && board[3] == "o" && board[6] == "o" ||
+                board[1] == "o" && board[4] == "o" && board[7] == "o" ||
+                board[2] == "o" && board[5] == "o" && board[8] == "o" ||
+                board[0] == "o" && board[4] == "o" && board[8] == "o" ||
+                board[2] == "o" && board[4] == "o" && board[6] == "o") {
+                message.textContent =`${player2} wins!`;
+                _finishGame();
+            } else if (!board.includes("")) {
+                message.textContent ="It's a tie!";
+            }
         }
 
         function playerPlay(cell) {
-            gameBoard.addMove(cell);
-            gameBoard.displayBoard();
-            gameBoard.isGameFinished();
-            changeTurn();
+            _addMove(cell);
+            gameBoard.displayBoard(board);
+            _isGameFinished(player1.playerName, player2.playerName);
+            _changeTurn(turn);
         }
 
-        return {playerPlay, getTurn}
+        function _finishGame() {
+                //fill remaining cells to avoid more moves
+            for (let cell in board) {
+                 if (board[cell] === "") {
+                    board[cell] = " ";
+                 }
+            }
+        }
+    
+        function restartGame() {
+            //let a different player start each game
+            _changeTurn(startingPlayer);
+            startingPlayer = turn;
+
+            for (let cell in board) {
+                board[cell] = "";
+            }
+            for (let cell in grid) {
+                grid[cell].textContent = "";
+            }
+            gameBoard.displayBoard(board);
+        }
+
+        return {getTurn, playerPlay, restartGame}
     })();
 
-    gameBoard.displayBoard();
+    const singlePlayerGame = (() => {
+        function computerPlay() {
+            if (runGame.getTurn() == "player2") {
+            runGame.playerPlay(Math.random()*8);
+            }
+        }
+
+        return{computerPlay}
+    });
 })();
 
