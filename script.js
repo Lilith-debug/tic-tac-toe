@@ -4,6 +4,7 @@ const game = (() => {
     const grid = Array.from(document.querySelectorAll(".board-cell"));
     const message = document.querySelector(".message");
     const restart = document.querySelector(".restart");
+    const singlePlayer = document.querySelector(".single-player");
 
     //bind events
     for (let cell in grid) {
@@ -15,6 +16,10 @@ const game = (() => {
     restart.addEventListener("click", () => {
         runGame.restartGame();
     })
+
+    singlePlayer.addEventListener("click", () => {
+        runGame.playSinglePlayer();
+    });
     
 
     const createPlayer = (name, symbol) => {
@@ -44,6 +49,7 @@ const game = (() => {
         const player2 = createPlayer("jill", "o");
         let startingPlayer = player1;
         let turn = player1;
+        let singlePlayer = false;
         
         const board = ["", "", "", "", "", "", "", "", ""];
 
@@ -63,6 +69,23 @@ const game = (() => {
             }
         }
     
+        function checkValidMove(move) {
+            if (board[move] === "") {
+                console.log("ok");
+                return true;
+            };
+        }
+
+        function playerPlay(cell) {
+            _addMove(cell);
+            gameBoard.displayBoard(board);
+            _isGameFinished(player1.playerName, player2.playerName);
+            _changeTurn(turn);
+            if (turn == player2 && singlePlayer === true && _isGameFinished(player1.playerName, player2.playerName) === false) {
+                computerPlayer.computerPlay();
+            }
+        }
+
         function _isGameFinished(player1, player2) {
             if (board[0] == "x" && board[1] == "x" && board[2] == "x" ||
                 board[3] == "x" && board[4] == "x" && board[5] == "x" ||
@@ -74,6 +97,7 @@ const game = (() => {
                 board[2] == "x" && board[4] == "x" && board[6] == "x") {
                 message.textContent = `${player1} wins!`;
                 _finishGame();
+                return true;
             } else if (board[0] == "o" && board[1] == "o" && board[2] == "o" ||
                 board[3] == "o" && board[4] == "o" && board[5] == "o" ||
                 board[6] == "o" && board[7] == "o" && board[8] == "o" ||
@@ -84,16 +108,11 @@ const game = (() => {
                 board[2] == "o" && board[4] == "o" && board[6] == "o") {
                 message.textContent =`${player2} wins!`;
                 _finishGame();
+                return true;
             } else if (!board.includes("")) {
                 message.textContent ="It's a tie!";
-            }
-        }
-
-        function playerPlay(cell) {
-            _addMove(cell);
-            gameBoard.displayBoard(board);
-            _isGameFinished(player1.playerName, player2.playerName);
-            _changeTurn(turn);
+                return true;
+            } else { return false; }
         }
 
         function _finishGame() {
@@ -110,6 +129,8 @@ const game = (() => {
             _changeTurn(startingPlayer);
             startingPlayer = turn;
 
+            message.textContent = "";
+
             for (let cell in board) {
                 board[cell] = "";
             }
@@ -117,19 +138,34 @@ const game = (() => {
                 grid[cell].textContent = "";
             }
             gameBoard.displayBoard(board);
-        }
-
-        return {getTurn, playerPlay, restartGame}
-    })();
-
-    const singlePlayerGame = (() => {
-        function computerPlay() {
-            if (runGame.getTurn() == "player2") {
-            runGame.playerPlay(Math.random()*8);
+            if (turn === player2) {
+                computerPlayer.computerPlay();
             }
         }
 
-        return{computerPlay}
-    });
+        function playSinglePlayer() {
+            singlePlayer = true;
+            player2.playerName = "Computer";
+            restartGame();
+        }
+
+        return {getTurn, checkValidMove, playerPlay, restartGame, playSinglePlayer}
+    })();
+
+    const computerPlayer = (() => {
+        function computerPlay() {
+            let i = true;
+            while(i) {
+                move = Math.round(Math.random()*8);
+                console.log(move);
+                if (runGame.checkValidMove(move)) {
+                    runGame.playerPlay(move);
+                    i = false;
+                }
+            }    
+        }
+
+        return {computerPlay}
+    })();
 })();
 
